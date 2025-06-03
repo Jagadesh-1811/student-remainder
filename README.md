@@ -1,6 +1,6 @@
 # student-remainder
 
-You want to build a Student Reminder Website that allows students to:
+Student Reminder Website that allows students to:
 
 Set their own timetable.
 
