@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Timetable Reminder</title>
+    <style>
+        :root {
+            --primary: #3a506b;
+            --secondary: #1c2541;
+            --accent: #6fffe9;
+            --light: #eef8ff;
+            --success: #20bf55;
+            --danger: #eb4d4b;
+            --warning: #f9ca24;
+            --info: #0abde3;
+            --background: #0b132b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--background);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(58, 80, 107, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(111, 255, 233, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(111, 255, 233, 0.5);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(111, 255, 233, 0.2);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(111, 255, 233, 0.3);
+            background-color: rgba(58, 80, 107, 0.3);
+            color: var(--light);
+            margin-bottom: 10px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(111, 255, 233, 0.2);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: var(--light);
+            border: 1px solid var(--accent);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--accent);
+            color: var(--secondary);
+        }
+        
+        .timetable {
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: rgba(58, 80, 107, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(111, 255, 233, 0.1);
+        }
+        
+        th {
+            background-color: rgba(28, 37, 65, 0.7);
+            color: var(--accent);
+        }
+        
+        tr:hover {
+            background-color: rgba(111, 255, 233, 0.1);
+        }
+        
+        .delete-btn {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .delete-btn:hover {
+            background-color: #ff6b6b;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--secondary);
+            color: var(--light);
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.5s;
+            z-index: 1000;
+            max-width: 300px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+        
+        .subject-monday { background-color: rgba(224, 16, 47, 0.2); }
+        .subject-tuesday { background-color: rgba(240, 131, 6, 0.2); }
+        .subject-wednesday { background-color: rgba(13, 234, 87, 0.2); }
+        .subject-thursday { background-color: rgba(11, 186, 227, 0.2); }
+        .subject-friday { background-color: rgba(126, 9, 243, 0.2); }
+        .subject-saturday { background-color: rgba(243, 16, 12, 0.832); }
+        .subject-sunday { background-color: rgba(106, 176, 76, 0.2); }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Student Timetable Reminder</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="add">Add Subject</div>
+            <div class="tab" data-tab="view">View Timetable</div>
+            <div class="tab" data-tab="settings">Settings</div>
+        </div>
+        
+        <div class="tab-content active" id="add">
+            <form id="subject-form">
+                <div class="form-group">
+                    <label for="subject">Subject Name:</label>
+                    <input type="text" id="subject" required placeholder="e.g. Mathematics">
+                </div>
+                
+                <div class="form-group">
+                    <label for="day">Day:</label>
+                    <select id="day" required>
+                        <option value="" disabled selected>Select a day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="start-time">Start Time:</label>
+                    <input type="time" id="start-time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="end-time">End Time:</label>
+                    <input type="time" id="end-time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reminder">Reminder (minutes before):</label>
+                    <select id="reminder" required>
+                        <option value="5">5 minutes</option>
+                        <option value="10">10 minutes</option>
+                        <option value="15" selected>15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                    </select>
+                </div>
+                
+                <button type="submit">Add Subject</button>
+            </form>
+        </div>
+        
+        <div class="tab-content" id="view">
+            <div class="form-group">
+                <label for="filter-day">Filter by Day:</label>
+                <select id="filter-day">
+                    <option value="all">All Days</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
+            
+            <div class="timetable">
+                <h2>Your Timetable</h2>
+                <table id="timetable-list">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Subject</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Timetable data will be dynamically inserted here -->
+                    </tbody>
+                </table>
+                <p id="no-subjects" style="text-align: center; margin-top: 20px; display: none;">No subjects added yet.</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="settings">
+            <div class="form-group">
+                <label for="notification-sound">Notification Sound:</label>
+                <select id="notification-sound">
+                    <option value="default">Default</option>
+                    <option value="bell">Bell</option>
+                    <option value="chime">Chime</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="enable-notifications" checked> 
+                    Enable Notifications
+                </label>
+            </div>
+            
+            <button id="clear-data">Clear All Data</button>
+            <button id="test-notification" style="margin-left: 10px;">Test Notification</button>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <div class="notification-title">Subject Reminder</div>
+        <div class="notification-message">Your subject is starting soon!</div>
+    </div>
+    <script  src="document.js">
+
+    </script>
+</body>
+</html>
+   
